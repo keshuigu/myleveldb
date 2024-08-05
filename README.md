@@ -1,2 +1,2 @@
 # myleveldb
-learning key-value database
+learning key-value database from [leveldb](https://github.com/google/leveldb)
