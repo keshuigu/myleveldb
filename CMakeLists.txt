@@ -77,8 +77,8 @@ check_cxx_source_compiles("
 int main() { std::string str; return 0; }
 " HAVE_CXX17_HAS_INCLUDE)
 
-set(LEVELDB_PUBLIC_INCLUDE_DIR "include/leveldb") # 公共include 目录
-set(LEVELDB_PORT_CONFIG_DIR "include/port")
+set(LEVELDB_PUBLIC_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/include/leveldb") # 公共include 目录
+set(LEVELDB_PORT_CONFIG_DIR "${PROJECT_SOURCE_DIR}/include/port")
 
 # 生成头文件
 configure_file(
@@ -110,6 +110,8 @@ target_sources(leveldb
     "db/builder.cc"
   PUBLIC
     # TODO
+    "${LEVELDB_PUBLIC_INCLUDE_DIR}/export.h"
+    "${LEVELDB_PUBLIC_INCLUDE_DIR}/slice.h"
 )
 
 if(WIN32)

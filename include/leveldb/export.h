@@ -1,0 +1,21 @@
+// 定义导出符号，由于无win32，此处进行简化
+#ifndef STORAGE_LEVELDB_INCLUDE_EXPORT_H_
+#define STORAGE_LEVELDB_INCLUDE_EXPORT_H_
+
+#ifndef LEVELDB_EXPORT
+
+#ifdef LEVELDB_SHARED_LIBRARY
+
+#ifdef LEVELDB_COMPILE_LIBRARY
+#define LEVELDB_EXPORT __attribute__((visibility("default")))
+#else
+#define LEVELDB_EXPORT
+#endif // LEVELDB_COMPILE_LIBRARY
+
+#else
+#define LEVELDB_EXPORT
+#endif // LEVELDB_SHARED_LIBRARY
+
+#endif // LEVELDB_EXPORT
+
+#endif  // STORAGE_LEVELDB_INCLUDE_EXPORT_H_
