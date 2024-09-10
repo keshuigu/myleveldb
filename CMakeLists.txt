@@ -108,10 +108,16 @@ target_sources(leveldb
     "${PROJECT_BINARY_DIR}/${LEVELDB_PORT_CONFIG_DIR}/port_config.h"
     # TODO
     "db/builder.cc"
+    "port/port_stdcxx.h"
+    "port/port.h"
+    "port/thread_annotations.h"
+    "util/status.cc"
   PUBLIC
     # TODO
+    "${LEVELDB_PUBLIC_INCLUDE_DIR}/env.h"
     "${LEVELDB_PUBLIC_INCLUDE_DIR}/export.h"
     "${LEVELDB_PUBLIC_INCLUDE_DIR}/slice.h"
+    "${LEVELDB_PUBLIC_INCLUDE_DIR}/status.h"
 )
 
 if(WIN32)

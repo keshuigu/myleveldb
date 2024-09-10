@@ -1,10 +1,8 @@
-// #include <crcutil/crc32c_sse4.h>
-#include <snappy.h>
-// #include <zstd.h>
-
 #include <iostream>
+#include "leveldb/slice.h"
+#include "leveldb/status.h"
 int main() {
-  std::cout <<snappy::kBlockLog << std::endl;
-  // ZSTD_isError(0);
+  leveldb::Status s = leveldb::Status::IOError(leveldb::Slice("hello"),leveldb::Slice("Status"));
+  std::cout << s.ToString() << std::endl;
   return 0;
 }
