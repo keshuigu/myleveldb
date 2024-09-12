@@ -8,6 +8,8 @@
 
 #include "leveldb/export.h"
 #include "leveldb/status.h"
+#include "leveldb/slice.h"
+
 
 // 不考虑win32
 // 弃用DeleteFile 和 DeleteDir
@@ -70,11 +72,11 @@ class LEVELDB_EXPORT Env {
   virtual Status GetChildren(const std::string& dir,
                              std::vector<std::string>* result) = 0;
 
-  virtual Status RemoveFile(const std::string& fname);
+  virtual Status RemoveFile(const std::string& fname) = 0;
 
   virtual Status CreateDir(const std::string& dirname) = 0;
 
-  virtual Status RemoveDir(const std::string& dirname);
+  virtual Status RemoveDir(const std::string& dirname) = 0;
 
   virtual Status GetFileSize(const std::string& fname, uint64_t* file_size) = 0;
 
@@ -163,6 +165,15 @@ class LEVELDB_EXPORT WritableFile {
   virtual Status Sync() = 0;
 };
 
+class LEVELDB_EXPORT Logger {
+ public:
+  Logger() = default;
+  Logger(const Logger&) = delete;
+  Logger& operator=(const Logger&) = delete;
+  virtual ~Logger();
+  virtual void Logv(const char* format,std::va_list ap) = 0;
+};
+
 class LEVELDB_EXPORT FileLock {
  public:
   FileLock() = default;
@@ -182,9 +193,12 @@ void Log(Logger* info_log, const char* format, ...)
 
 LEVELDB_EXPORT Status WriteStringToFile(Env* env, const Slice& data,
                                         const std::string& fname);
-
+// leveldb中声明在filename.cc中
+// TODO 导出？移动声明位置？
+Status WriteStringToFileSync(Env* env, const Slice& data,
+                                        const std::string& fname);
 LEVELDB_EXPORT Status ReadFileToString(Env* env, const std::string& fname,
-                                       std::string& data);
+                                       std::string* data);
 
 // 封装Env，便于只修改部分函数来实现新的Env
 class EnvWrapper : public Env {
