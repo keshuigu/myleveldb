@@ -5,7 +5,7 @@
 namespace leveldb {
 Env::Env() = default;
 Env::~Env() = default;
-Status NewAppendableFile(const std::string& fname, WritableFile** result) {
+Status Env::NewAppendableFile(const std::string& fname, WritableFile** result) {
   return Status::NotSupported("NewAppendableFile", fname);
 }
 SequentialFile::~SequentialFile() = default;

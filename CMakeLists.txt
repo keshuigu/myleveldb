@@ -112,6 +112,7 @@ target_sources(leveldb
     "port/port.h"
     "port/thread_annotations.h"
     "util/status.cc"
+    "util/env.cc"
   PUBLIC
     # TODO
     "${LEVELDB_PUBLIC_INCLUDE_DIR}/env.h"
@@ -124,12 +125,12 @@ if(WIN32)
   # TODO
   message( FATAL_ERROR "Not Implement")
 else()
-  # TODO
-  # target_sources(leveldb
-  #   PRIVATE
-  #     "util/env_posix.cc"
-  #     "util/posix_logger.h"
-  # )
+  target_sources(leveldb
+    PRIVATE
+
+      "util/env_posix.cc"
+      "util/posix_logger.h"
+  )
 endif()
 
 # TODO
