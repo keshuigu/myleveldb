@@ -6,6 +6,6 @@
 // #include "helpers/memenv/memenv.h"
 #include "leveldb/env.h"
 #include "leveldb/slice.h"
-// #include "util/random.h"
+#include "util/random.h"
 
 #endif

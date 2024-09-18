@@ -113,6 +113,8 @@ target_sources(leveldb
     "port/thread_annotations.h"
     "util/status.cc"
     "util/env.cc"
+    "util/random.h"
+    "util/mutexlock.h"
   PUBLIC
     # TODO
     "${LEVELDB_PUBLIC_INCLUDE_DIR}/env.h"
