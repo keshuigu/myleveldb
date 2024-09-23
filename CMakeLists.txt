@@ -234,6 +234,8 @@ if(LEVELDB_BUILD_TESTS)
     PRIVATE
       "${PROJECT_BINARY_DIR}/${LEVELDB_PORT_CONFIG_DIR}/port_config.h"
       "util/status_test.cc"
+      "util/testutil.h"
+      "util/testutil.cc"
   )
   if(NOT BUILD_SHARED_LIBS)
     target_sources(leveldb_tests
