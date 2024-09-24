@@ -42,7 +42,7 @@ class Random {
   bool OneIn(int n) { return (Next() % n) == 0; }
 
   // 首先从[0,max_log]均匀选取base
-  // 再从[0,2^max_log-1]均匀选取随机数
+  // 再从[0,2^base-1]均匀选取随机数
   // 因此小的数值更有可能选中
   uint32_t Skewed(int max_log) { return Uniform(1 << Uniform(max_log + 1)); }
 

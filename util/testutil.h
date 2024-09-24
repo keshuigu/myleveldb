@@ -18,7 +18,7 @@ MATCHER(IsOK, "") { return arg.ok(); }  // 自定义规则
 #define EXPECT_LEVELDB_OK(expression) \
   EXPECT_THAT(expression, leveldb::test::IsOK())
 
-#define EXPECT_LEVELDB_OK(expression) \
+#define ASSERT_LEVELDB_OK(expression) \
   ASSERT_THAT(expression, leveldb::test::IsOK())
 
 inline int RandomSeed() {
