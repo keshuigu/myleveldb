@@ -30,6 +30,7 @@
 #include "port/port.h"
 #include "port/thread_annotations.h"
 #include "util/env_posix_test_helper.h"
+#include "util/mutexlock.h"
 #include "util/posix_logger.h"
 
 namespace leveldb {
@@ -394,6 +395,95 @@ class PosixWritableFile final : public WritableFile {
 };
 
 // TODO LockOrUnLock
+int LockOrUnlock(int fd, bool lock) {
+  errno = 0;
+  struct ::flock file_lock_info;
+  std::memset(&file_lock_info, 0, sizeof(file_lock_info));
+  file_lock_info.l_type = (lock ? F_WRLCK : F_UNLCK);
+  file_lock_info.l_whence = SEEK_SET;
+  file_lock_info.l_start = 0;
+  file_lock_info.l_len = 0;  // for entire file
+  return ::fcntl(fd, F_SETLK, &file_lock_info);
+}
 
+class PosixFileLock : public FileLock {
+ public:
+  PosixFileLock(int fd, std::string filename)
+      : fd_(fd), filename_(std::move(filename)) {}
+  int fd() const { return fd_; }
+  const std::string& filename() const { return filename_; }
+
+ private:
+  const int fd_;
+  const std::string filename_;
+};
+
+// 跟踪由PosixEnv::LockFile()上锁的文件
+class PosixLockTable {
+ public:
+  bool Insert(const std::string& fname) LOCKS_EXCLUDED(mu_) {
+    MutexLock l(&mu_);
+    bool succeeded = locked_files_.insert(fname).second;
+    return succeeded;
+  }
+
+  void Remove(const std::string& fname) LOCKS_EXCLUDED(mu_) {
+    MutexLock l(&mu_);
+    locked_files_.erase(fname);
+  }
+
+ private:
+  port::Mutex mu_;
+  std::set<std::string> locked_files_ GUARDED_BY(mu_);
+};
+
+class PosixEnv : public Env {
+ public:
+ private:
+  void BackgroundThreadMain();
+
+  static void BackgroundThreadEntryPoint(PosixEnv* env) {
+    env->BackgroundThreadMain();
+  }
+
+  struct BackgroundWorkItem {
+    explicit BackgroundWorkItem(void (*function)(void* arg), void* arg)
+        : function(function), arg(arg) {}
+
+    void (*const function)(void*);
+    void* const arg;
+  };
+
+  port::Mutex background_work_mutex_;
+  port::CondVar background_work_cv_ GUARDED_BY(background_work_mutex_);
+  bool started_background_thread_ GUARDED_BY(background_work_mutex_);
+
+  std::queue<BackgroundWorkItem> background_work_queue_
+      GUARDED_BY(background_work_mutex_);
+  PosixLockTable locks_;
+  Limiter mmap_limiter_;
+  Limiter fd_limiter;
+};
+
+int MaxMmaps() { return g_mmap_limit; }
+int MaxOpenFiles() {
+  if (g_open_read_only_file_limit >= 0) {
+    return g_open_read_only_file_limit;
+  }
+  struct ::rlimit rlim;
+  if (::getrlimit(RLIMIT_NOFILE, &rlim)) {
+    // getrlimit failed, fallback to hard-coded default.
+    g_open_read_only_file_limit = 50;
+  } else if (rlim.rlim_cur == RLIM_INFINITY) {
+    g_open_read_only_file_limit = std::numeric_limits<int>::max();
+  } else {
+    // 20 %
+    g_open_read_only_file_limit = rlim.rlim_cur / 5;
+  }
+  return g_open_read_only_file_limit;
+}
+
+//  TODO in leveldb these out of no name
+void BackgroundThreadMain() {}
 }  // namespace
 }  // namespace leveldb
