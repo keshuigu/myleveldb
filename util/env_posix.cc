@@ -220,7 +220,8 @@ class PosixMmapReadableFile final : public RandomAccessFile {
     mmap_limiter_->Release();
   }
 
-  Status Read(uint64_t offset, size_t n, Slice* result, char* scratch) {
+  Status Read(uint64_t offset, size_t n, Slice* result,
+              char* scratch) const override {
     if (offset + n > length_) {
       *result = Slice();
       return PosixError(filename_, EINVAL);
@@ -394,7 +395,6 @@ class PosixWritableFile final : public WritableFile {
   const std::string dirname_;  // The directory of filename_.
 };
 
-// TODO LockOrUnLock
 int LockOrUnlock(int fd, bool lock) {
   errno = 0;
   struct ::flock file_lock_info;
@@ -439,6 +439,205 @@ class PosixLockTable {
 
 class PosixEnv : public Env {
  public:
+  PosixEnv();
+  ~PosixEnv() override {
+    static const char msg[] =
+        "PosixEnv singleton destroyed. Unsupported behavior!\n";  // 单例模式
+    std::fwrite(msg, 1, sizeof(msg), stderr);
+    std::abort();  // 立即终止，核心转储
+  }
+
+  Status NewSequentialFile(const std::string& filename,
+                           SequentialFile** result) override {
+    int fd = ::open(filename.c_str(), O_RDONLY | kOpenBaseFlags);
+    if (fd < 0) {
+      *result = nullptr;
+      return PosixError(filename, errno);
+    }
+    *result = new PosixSequentialFile(filename, fd);
+    return Status::OK();
+  }
+
+  Status NewRandomAccessFile(const std::string& filename,
+                             RandomAccessFile** result) {
+    *result = nullptr;
+    int fd = ::open(filename.c_str(), O_RDONLY | kOpenBaseFlags);
+    if (fd < 0) {
+      return PosixError(filename, errno);
+    }
+    if (!mmap_limiter_.Acquire()) {
+      *result = new PosixRandomAccessFile(filename, fd, &fd_limiter_);
+      return Status::OK();
+    }
+
+    uint64_t file_size;
+    Status status = GetFileSize(filename, &file_size);
+    if (status.ok()) {
+      // void * mmap(void *__addr, size_t __len, int __prot, int __flags, int
+      // __fd, off_t __offset)
+      void* mmap_base =
+          ::mmap(nullptr, file_size, PROT_READ, MAP_SHARED, fd, 0);
+      if (mmap_base != MAP_FAILED) {
+        *result = new PosixMmapReadableFile(filename,
+                                            reinterpret_cast<char*>(mmap_base),
+                                            file_size, &mmap_limiter_);
+
+      } else {
+        status = PosixError(filename, errno);
+      }
+    } else {
+      mmap_limiter_.Release();
+    }
+    ::close(fd);
+    return status;
+  }
+
+  Status NewWritableFile(const std::string& filename,
+                         WritableFile** result) override {
+    int fd = ::open(filename.c_str(),
+                    O_TRUNC | O_WRONLY | O_CREAT | kOpenBaseFlags, 0644);
+    if (fd < 0) {
+      *result = nullptr;
+      return PosixError(filename, errno);
+    }
+    *result = new PosixWritableFile(filename, fd);
+    return Status::OK();
+  }
+
+  Status NewAppendableFile(const std::string& filename,
+                           WritableFile** result) override {
+    int fd = ::open(filename.c_str(),
+                    O_APPEND | O_WRONLY | O_CREAT | kOpenBaseFlags, 0644);
+    if (fd < 0) {
+      *result = nullptr;
+      return PosixError(filename, errno);
+    }
+
+    *result = new PosixWritableFile(filename, fd);
+    return Status::OK();
+  }
+
+  bool FileExists(const std::string& filename) override {
+    return ::access(filename.c_str(), F_OK) == 0;
+  }
+  Status GetChildren(const std::string& directory_path,
+                     std::vector<std::string>* result) override {
+    result->clear();
+    ::DIR* dir = ::opendir(directory_path.c_str());
+    if (dir == nullptr) {
+      return PosixError(directory_path, errno);
+    }
+    struct ::dirent* entry;
+    while ((entry = ::readdir(dir)) != nullptr) {
+      result->emplace_back(entry->d_name);
+    }
+    ::closedir(dir);
+    return Status::OK();
+  }
+  Status RemoveFile(const std::string& fname) override {
+    if (::unlink(fname.c_str()) != 0) {
+      return PosixError(fname, errno);
+    }
+    return Status::OK();
+  }
+
+  Status CreateDir(const std::string& dirname) override {
+    if (::mkdir(dirname.c_str(), 0755) != 0) {
+      return PosixError(dirname, errno);
+    }
+    return Status::OK();
+  }
+
+  Status RemoveDir(const std::string& dirname) override {
+    if (::rmdir(dirname.c_str()) != 0) {
+      return PosixError(dirname, errno);
+    }
+    return Status::OK();
+  }
+
+  Status GetFileSize(const std::string& fname, uint64_t* file_size) override {
+    struct ::stat file_stat;
+    if (::stat(fname.c_str(), &file_stat) != 0) {
+      *file_size = 0;
+      return PosixError(fname, errno);
+    }
+    *file_size = file_stat.st_size;
+    return Status::OK();
+  }
+
+  Status RenameFile(const std::string& src,
+                    const std::string& target) override {
+    if (std::rename(src.c_str(), target.c_str()) != 0) {
+      return PosixError(src, errno);
+    }
+    return Status::OK();
+  }
+
+  Status LockFile(const std::string& filename, FileLock** lock) override {
+    *lock = nullptr;
+    int fd = ::open(filename.c_str(), O_RDWR | O_CREAT | kOpenBaseFlags, 0644);
+    if (fd < 0) {
+      return PosixError(filename, errno);
+    }
+    if (!locks_.Insert(filename)) {
+      ::close(fd);
+      return Status::IOError("lock " + filename, "already held by process");
+    }
+    if (LockOrUnlock(fd, true) == -1) {
+      ::close(fd);
+      locks_.Remove(filename);
+      return PosixError("lock " + filename, errno);
+    }
+    *lock = new PosixFileLock(fd, filename);
+    return Status::OK();
+  }
+
+  Status UnlockFile(FileLock* lock) override {
+    PosixFileLock* posix_file_lock = static_cast<PosixFileLock*>(lock);
+    if (LockOrUnlock(posix_file_lock->fd(), false) == -1) {
+      return PosixError("unlock " + posix_file_lock->filename(), errno);
+    }
+    locks_.Remove(posix_file_lock->filename());
+    ::close(posix_file_lock->fd());
+    delete posix_file_lock;
+    return Status::OK();
+  }
+
+  void Schedule(void (*function)(void* arg), void* arg);
+  void StartThread(void (*function)(void* arg), void* arg) override {
+    std::thread new_thread(function, arg);
+    new_thread.detach();
+  }
+  Status GetTestDirectory(std::string* path) {
+    const char* env = std::getenv("TEST_TMPDIR");
+    if (env && env[0] != '\0') {
+      *path = env;
+    } else {
+      char buf[100];
+      std::snprintf(buf, sizeof(buf), "/tmp/leveldbtest-%d",
+                    static_cast<int>(::geteuid()));
+      *path = buf;
+    }
+    // The CreateDir status is ignored because the directory may already exist.
+    CreateDir(*path);
+    return Status::OK();
+  }
+
+  // 日志文件
+  Status NewLogger(const std::string& fname, Logger** result) {
+    int fd = ::open(fname.c_str(),
+                    O_APPEND | O_WRONLY | O_CREAT | kOpenBaseFlags, 0644);
+    if (fd < 0) {
+      *result = nullptr;
+      return PosixError(fname, errno);
+    }
+  }
+
+  // 获取时间
+  uint64_t NowMicros() = 0;
+
+  void SleepForMicroseconds(int micros) = 0;
+
  private:
   void BackgroundThreadMain();
 
@@ -462,7 +661,7 @@ class PosixEnv : public Env {
       GUARDED_BY(background_work_mutex_);
   PosixLockTable locks_;
   Limiter mmap_limiter_;
-  Limiter fd_limiter;
+  Limiter fd_limiter_;
 };
 
 int MaxMmaps() { return g_mmap_limit; }
