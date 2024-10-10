@@ -58,7 +58,7 @@ Status PosixError(const std::string& context, int error_number) {
 // 防止耗尽资源所使用的辅助类
 class Limiter {
  public:
-  Limiter(int max_acquires)
+  explicit Limiter(int max_acquires)
 #if !defined(NDEBUG)  // NDEBUG 控制宏是否禁用
       : max_acquires_(max_acquires),
 #endif
@@ -603,12 +603,12 @@ class PosixEnv : public Env {
     return Status::OK();
   }
 
-  void Schedule(void (*function)(void* arg), void* arg);
+  void Schedule(void (*function)(void* arg), void* arg) override;
   void StartThread(void (*function)(void* arg), void* arg) override {
     std::thread new_thread(function, arg);
     new_thread.detach();
   }
-  Status GetTestDirectory(std::string* path) {
+  Status GetTestDirectory(std::string* path) override {
     const char* env = std::getenv("TEST_TMPDIR");
     if (env && env[0] != '\0') {
       *path = env;
@@ -624,19 +624,35 @@ class PosixEnv : public Env {
   }
 
   // 日志文件
-  Status NewLogger(const std::string& fname, Logger** result) {
+  Status NewLogger(const std::string& fname, Logger** result) override {
     int fd = ::open(fname.c_str(),
                     O_APPEND | O_WRONLY | O_CREAT | kOpenBaseFlags, 0644);
     if (fd < 0) {
       *result = nullptr;
       return PosixError(fname, errno);
     }
+    std::FILE* fp = ::fdopen(fd, "w");
+    if (fp == nullptr) {
+      ::close(fd);
+      *result = nullptr;
+      return PosixError(fname, errno);
+    } else {
+      *result = new PosixLogger(fp);
+      return Status::OK();
+    }
   }
 
   // 获取时间
-  uint64_t NowMicros() = 0;
+  uint64_t NowMicros() override {
+    static constexpr uint64_t kUsecondsPerSecond = 1000000;
+    struct ::timeval tv;
+    ::gettimeofday(&tv, nullptr);
+    return static_cast<uint64_t>(tv.tv_sec) * kUsecondsPerSecond + tv.tv_usec;
+  }
 
-  void SleepForMicroseconds(int micros) = 0;
+  void SleepForMicroseconds(int micros) override {
+    std::this_thread::sleep_for(std::chrono::microseconds(micros));
+  }
 
  private:
   void BackgroundThreadMain();
@@ -683,6 +699,84 @@ int MaxOpenFiles() {
 }
 
 //  TODO in leveldb these out of no name
-void BackgroundThreadMain() {}
+PosixEnv::PosixEnv()
+    : background_work_cv_(&background_work_mutex_),
+      started_background_thread_(false),
+      mmap_limiter_(MaxMmaps()),  //  此处为调用单参构造函数，并非隐式转换
+      fd_limiter_(MaxOpenFiles()) {}
+
+void PosixEnv::Schedule(void (*function)(void* arg), void* arg) {
+  MutexLock l(&background_work_mutex_);
+
+  // Start the background thread, if we haven't done so already.
+  if (!started_background_thread_) {
+    started_background_thread_ = true;
+    std::thread background_thread(PosixEnv::BackgroundThreadEntryPoint, this);
+    background_thread.detach();
+  }
+  // If the queue is empty, the background thread may be waiting for work.
+  if (background_work_queue_.empty()) {
+    background_work_cv_.Signal();
+  }
+  background_work_queue_.emplace(function, arg);
+}
+
+void PosixEnv::BackgroundThreadMain() {
+  while (true) {
+    background_work_mutex_.Lock();
+    // 没有可执行的程序就阻塞
+    while (background_work_queue_.empty()) {
+      background_work_cv_.Wait();  // 此处会释放锁，当被唤醒后，重新加锁
+    }
+    assert(!background_work_queue_.empty());
+    auto background_work_function = background_work_queue_.front().function;
+    void* background_work_arg = background_work_queue_.front().arg;
+    background_work_queue_.pop();
+
+    background_work_mutex_.Unlock();
+    background_work_function(background_work_arg);
+  }
+}
+
+// Wraps an Env instance whose destructor is never created.
+//
+// Intended usage:
+//   using PlatformSingletonEnv = SingletonEnv<PlatformEnv>;
+//   void ConfigurePosixEnv(int param) {
+//     PlatformSingletonEnv::AssertEnvNotInitialized();
+//     // set global configuration flags.
+//   }
+//   Env* Env::Default() {
+//     static PlatformSingletonEnv default_env;
+//     return default_env.env();
+//   }
+template <typename EnvType>
+class SingletonEnv {
+ public:
+  SingletonEnv() {
+#if !defined(NDEBUG)
+    env_initialized_.store(true, std::memory_order_relaxed);
+#endif  // !defined(NDEBUG)
+    static_assert(sizeof(env_storage_) >= sizeof(EnvType),
+                  "env_storage_ will not fit the Env");
+    static_assert(alignof(decltype(env_storage_)) >= alignof(EnvType),
+                  "env_storage_ does not meet the Env's alignment needs");
+    new (&env_storage_) EnvType();  // placement new
+  }
+  ~SingletonEnv() = default;
+  SingletonEnv(const SingletonEnv&) = delete;
+  SingletonEnv& operator=(const SingletonEnv&) = delete;
+
+  Env* env() { return reinterpret_cast<Env*>(&env_storage_); }
+
+ private:
+  typename std::aligned_storage<sizeof(EnvType), alignof(EnvType)>::type
+      env_storage_;
+#if !defined(NDEBUG)
+  static std::atomic<bool> env_initialized_;
+#endif  // !defined(NDEBUG)
+};
+
 }  // namespace
+
 }  // namespace leveldb
