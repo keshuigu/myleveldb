@@ -129,8 +129,10 @@ class PosixSequentialFile final : public SequentialFile {
         status = PosixError(filename_, errno);
         break;
       }
-      return status;
+      *result = Slice(scratch, read_size);
+      break;
     }
+    return status;
   }
 
   Status Skip(uint64_t n) {
@@ -769,14 +771,43 @@ class SingletonEnv {
 
   Env* env() { return reinterpret_cast<Env*>(&env_storage_); }
 
+  static void AssertEnvNotInitialized() {
+#if !defined(NDEBUG)
+    assert(!env_initialized_.load(std::memory_order_relaxed));
+#endif  // !defined(NDEBUG)
+  }
+
  private:
   typename std::aligned_storage<sizeof(EnvType), alignof(EnvType)>::type
-      env_storage_;
+      env_storage_;  // typename告诉编译器这个 ...::type 是类型 而不是变量
 #if !defined(NDEBUG)
-  static std::atomic<bool> env_initialized_;
-#endif  // !defined(NDEBUG)
+  static std::atomic<bool> env_initialized_;  // 声明
+#endif                                        // !defined(NDEBUG)
 };
 
+#if !defined(NDEBUG)
+template <typename EnvType>
+std::atomic<bool> SingletonEnv<EnvType>::env_initialized_;
+// 模板类静态成员变量的定义必须在类模板之外进行，以便为其分配内存
+#endif
+
+using PosixDefaultEnv = SingletonEnv<PosixEnv>;
+
 }  // namespace
+
+void EnvPosixTestHelper::SetReadOnlyFDLimit(int limit) {
+  PosixDefaultEnv::AssertEnvNotInitialized();
+  g_open_read_only_file_limit = limit;
+}
+
+void EnvPosixTestHelper::SetReadOnlyMMapLimit(int limit) {
+  PosixDefaultEnv::AssertEnvNotInitialized();
+  g_mmap_limit = limit;
+}
+
+Env* Env::Default() {
+  static PosixDefaultEnv env_container;
+  return env_container.env();
+}
 
 }  // namespace leveldb

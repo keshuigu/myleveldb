@@ -56,6 +56,7 @@ TEST_F(EnvTest, ReadWrite) {
       ASSERT_GT(read.size(), 0);
     }
     ASSERT_LE(read.size(), len);
+    read_result.append(read.data(), read.size());
   }
   ASSERT_EQ(read_result, data);
   delete sequential_file;

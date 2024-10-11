@@ -1,7 +1,7 @@
 #include "util/testutil.h"
 
 namespace leveldb {
-namespace test {}  // namespace test
+namespace test {
 Slice RandomString(Random* rnd, int len, std::string* dst) {
   dst->resize(len);
   for (int i = 0; i < len; i++) {
@@ -33,4 +33,5 @@ Slice CompressibleString(Random* rnd, double compressed_fraction, size_t len,
   dst->resize(len);
   return Slice(*dst);
 }
+}  // namespace test
 }  // namespace leveldb

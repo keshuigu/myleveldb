@@ -233,6 +233,7 @@ if(LEVELDB_BUILD_TESTS)
   target_sources(leveldb_tests
     PRIVATE
       "${PROJECT_BINARY_DIR}/${LEVELDB_PORT_CONFIG_DIR}/port_config.h"
+      "util/env_test.cc"
       "util/status_test.cc"
       "util/testutil.h"
       "util/testutil.cc"
@@ -284,15 +285,19 @@ if(LEVELDB_BUILD_TESTS)
   endfunction()
   # TODO
   # leveldb_test("db/c_test.cc")
-  # if(NOT BUILD_SHARED_LIBS)
-  #   # TODO(costan): This test also uses
-  #   #               "util/env_{posix|windows}_test_helper.h"
-  #   if (WIN32)
-  #     leveldb_test("util/env_windows_test.cc")
-  #   else (WIN32)
-  #     leveldb_test("util/env_posix_test.cc")
-  #   endif (WIN32)
-  # endif(NOT BUILD_SHARED_LIBS)
+  if(NOT BUILD_SHARED_LIBS)
+    # TODO(costan): This test also uses
+    #               "util/env_{posix|windows}_test_helper.h"
+    # if (WIN32)
+    #   leveldb_test("util/env_windows_test.cc")
+    # else (WIN32)
+      leveldb_test("util/env_posix_test.cc")
+      target_sources(env_posix_test
+        PRIVATE
+        "util/env_posix_test_helper.h"
+      )
+    # endif (WIN32)
+  endif(NOT BUILD_SHARED_LIBS)
 endif()
 
 # Google Benchmark
