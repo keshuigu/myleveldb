@@ -19,7 +19,6 @@ class FileLock;
 class Logger;
 class RandomAccessFile;
 class SequentialFile;
-// class Slice;
 class WritableFile;
 class LEVELDB_EXPORT Env {
  public:

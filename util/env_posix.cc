@@ -48,7 +48,7 @@ constexpr const int kOpenBaseFlags = 0;  // no use. in leveldb for O_CLOEXEC;
 constexpr const size_t kWritableFileBufferSize = 65536;
 
 Status PosixError(const std::string& context, int error_number) {
-  if (error_number == ENONET) {
+  if (error_number == ENOENT) {
     return Status::NotFound(context, std::strerror(error_number));
   } else {
     return Status::IOError(context, std::strerror(error_number));

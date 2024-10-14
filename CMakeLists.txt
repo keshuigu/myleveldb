@@ -115,6 +115,8 @@ target_sources(leveldb
     "util/env.cc"
     "util/random.h"
     "util/mutexlock.h"
+    "util/logging.h"
+    "util/logging.cc"
   PUBLIC
     # TODO
     "${LEVELDB_PUBLIC_INCLUDE_DIR}/env.h"
@@ -242,7 +244,7 @@ if(LEVELDB_BUILD_TESTS)
     target_sources(leveldb_tests
       PRIVATE
         # TODO
-        ""
+        "util/logging_test.cc"
     )
   endif()
   target_link_libraries(leveldb_tests leveldb gmock gtest gtest_main)
