@@ -135,7 +135,7 @@ class PosixSequentialFile final : public SequentialFile {
     return status;
   }
 
-  Status Skip(uint64_t n) {
+  Status Skip(uint64_t n) override {
     // lseek() 将文件fd_从SEEK_CUR位置往后设置n个字节
     if (::lseek(fd_, n, SEEK_CUR) == static_cast<off_t>(-1)) {
       return PosixError(filename_, errno);
@@ -461,7 +461,7 @@ class PosixEnv : public Env {
   }
 
   Status NewRandomAccessFile(const std::string& filename,
-                             RandomAccessFile** result) {
+                             RandomAccessFile** result) override {
     *result = nullptr;
     int fd = ::open(filename.c_str(), O_RDONLY | kOpenBaseFlags);
     if (fd < 0) {

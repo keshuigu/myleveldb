@@ -45,7 +45,7 @@ namespace port {
 class CondVar;  // 封装 std::condition_variabl
 
 // 封装 std::mutex
-class Mutex {
+class LOCKABLE Mutex {
  public:
   Mutex()=default;
   ~Mutex()=default;

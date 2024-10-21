@@ -108,6 +108,7 @@ target_sources(leveldb
     "${PROJECT_BINARY_DIR}/${LEVELDB_PORT_CONFIG_DIR}/port_config.h"
     # TODO
     "db/builder.cc"
+    "db/dbformat.h"
     "port/port_stdcxx.h"
     "port/port.h"
     "port/thread_annotations.h"
@@ -117,12 +118,15 @@ target_sources(leveldb
     "util/mutexlock.h"
     "util/logging.h"
     "util/logging.cc"
+    "util/coding.h"
+    "util/coding.cc"
   PUBLIC
     # TODO
     "${LEVELDB_PUBLIC_INCLUDE_DIR}/env.h"
     "${LEVELDB_PUBLIC_INCLUDE_DIR}/export.h"
     "${LEVELDB_PUBLIC_INCLUDE_DIR}/slice.h"
     "${LEVELDB_PUBLIC_INCLUDE_DIR}/status.h"
+    "${LEVELDB_PUBLIC_INCLUDE_DIR}/dumpfile.h"
 )
 
 if(WIN32)
@@ -147,7 +151,7 @@ endif()
 
 target_include_directories(leveldb
   PUBLIC
-    $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
+    $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include/>
     $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
 )
 
@@ -245,6 +249,7 @@ if(LEVELDB_BUILD_TESTS)
       PRIVATE
         # TODO
         "util/logging_test.cc"
+        "util/coding_test.cc"
     )
   endif()
   target_link_libraries(leveldb_tests leveldb gmock gtest gtest_main)
