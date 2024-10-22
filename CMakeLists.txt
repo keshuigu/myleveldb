@@ -120,6 +120,9 @@ target_sources(leveldb
     "util/logging.cc"
     "util/coding.h"
     "util/coding.cc"
+    "util/hash.cc"
+    "util/hash.h"
+    "util/cache.cc"
   PUBLIC
     # TODO
     "${LEVELDB_PUBLIC_INCLUDE_DIR}/env.h"
@@ -127,6 +130,9 @@ target_sources(leveldb
     "${LEVELDB_PUBLIC_INCLUDE_DIR}/slice.h"
     "${LEVELDB_PUBLIC_INCLUDE_DIR}/status.h"
     "${LEVELDB_PUBLIC_INCLUDE_DIR}/dumpfile.h"
+    "${LEVELDB_PUBLIC_INCLUDE_DIR}/db.h"
+    "${LEVELDB_PUBLIC_INCLUDE_DIR}/options.h"
+    "${LEVELDB_PUBLIC_INCLUDE_DIR}/cache.h"
 )
 
 if(WIN32)
@@ -250,6 +256,7 @@ if(LEVELDB_BUILD_TESTS)
         # TODO
         "util/logging_test.cc"
         "util/coding_test.cc"
+        "util/hash_test.cc"
     )
   endif()
   target_link_libraries(leveldb_tests leveldb gmock gtest gtest_main)
