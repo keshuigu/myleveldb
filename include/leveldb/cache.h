@@ -48,7 +48,7 @@ class LEVELDB_EXPORT Cache {
 
   // 删除所有未使用的条目
   // 默认情况下不操作
-  virtual void Prune() {}
+  virtual void Prune() = 0;
 
   // 估计cache的消耗
   virtual size_t TotalCharge() const = 0;
