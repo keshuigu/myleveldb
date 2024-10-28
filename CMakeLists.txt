@@ -109,6 +109,8 @@ target_sources(leveldb
     # TODO
     "db/builder.cc"
     "db/dbformat.h"
+    "db/filename.cc"
+    "db/filename.h"
     "port/port_stdcxx.h"
     "port/port.h"
     "port/thread_annotations.h"
@@ -249,6 +251,7 @@ if(LEVELDB_BUILD_TESTS)
       "util/status_test.cc"
       "util/testutil.h"
       "util/testutil.cc"
+      "db/filename_test.cc"
   )
   if(NOT BUILD_SHARED_LIBS)
     target_sources(leveldb_tests
