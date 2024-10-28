@@ -115,6 +115,5 @@ TEST(FileNameTest, Construction) {
   ASSERT_TRUE(ParseFileName(fname.c_str() + 4, &number, &type));
   ASSERT_EQ(0, number);
   ASSERT_EQ(kInfoLogFile, type);
-
 }
 }  // namespace leveldb
