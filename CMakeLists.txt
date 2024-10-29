@@ -125,6 +125,8 @@ target_sources(leveldb
     "util/hash.cc"
     "util/hash.h"
     "util/cache.cc"
+    "util/comparator.cc"
+    "util/no_destructor.h"
   PUBLIC
     # TODO
     "${LEVELDB_PUBLIC_INCLUDE_DIR}/env.h"
@@ -135,6 +137,7 @@ target_sources(leveldb
     "${LEVELDB_PUBLIC_INCLUDE_DIR}/db.h"
     "${LEVELDB_PUBLIC_INCLUDE_DIR}/options.h"
     "${LEVELDB_PUBLIC_INCLUDE_DIR}/cache.h"
+    "${LEVELDB_PUBLIC_INCLUDE_DIR}/comparator.h"
 )
 
 if(WIN32)
@@ -251,6 +254,7 @@ if(LEVELDB_BUILD_TESTS)
       "util/status_test.cc"
       "util/testutil.h"
       "util/testutil.cc"
+      "util/no_destructor_test.cc"
       "db/filename_test.cc"
   )
   if(NOT BUILD_SHARED_LIBS)

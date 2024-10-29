@@ -806,7 +806,7 @@ void EnvPosixTestHelper::SetReadOnlyMMapLimit(int limit) {
 }
 
 Env* Env::Default() {
-  static PosixDefaultEnv env_container;
+  static PosixDefaultEnv env_container; // 其实类似于no_destruct，只是多了1个静态成员用于判断是否已初始化
   return env_container.env();
 }
 
