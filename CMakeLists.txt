@@ -111,9 +111,12 @@ target_sources(leveldb
     "db/dbformat.h"
     "db/filename.cc"
     "db/filename.h"
+    "db/version_edit.h"
+    "db/version_edit.cc"
     "port/port_stdcxx.h"
     "port/port.h"
     "port/thread_annotations.h"
+    "util/bloom.cc"
     "util/status.cc"
     "util/env.cc"
     "util/random.h"
@@ -127,6 +130,7 @@ target_sources(leveldb
     "util/cache.cc"
     "util/comparator.cc"
     "util/no_destructor.h"
+    "util/filter_policy.cc"
   PUBLIC
     # TODO
     "${LEVELDB_PUBLIC_INCLUDE_DIR}/env.h"
@@ -138,6 +142,7 @@ target_sources(leveldb
     "${LEVELDB_PUBLIC_INCLUDE_DIR}/options.h"
     "${LEVELDB_PUBLIC_INCLUDE_DIR}/cache.h"
     "${LEVELDB_PUBLIC_INCLUDE_DIR}/comparator.h"
+    "${LEVELDB_PUBLIC_INCLUDE_DIR}/filter_policy.h"
 )
 
 if(WIN32)
@@ -255,11 +260,12 @@ if(LEVELDB_BUILD_TESTS)
       "util/testutil.h"
       "util/testutil.cc"
       "util/no_destructor_test.cc"
-      "db/filename_test.cc"
   )
   if(NOT BUILD_SHARED_LIBS)
     target_sources(leveldb_tests
       PRIVATE
+        "db/filename_test.cc"
+        "util/bloom_test.cc"
         # TODO
         "util/logging_test.cc"
         "util/coding_test.cc"
