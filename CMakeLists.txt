@@ -143,6 +143,7 @@ target_sources(leveldb
     "${LEVELDB_PUBLIC_INCLUDE_DIR}/cache.h"
     "${LEVELDB_PUBLIC_INCLUDE_DIR}/comparator.h"
     "${LEVELDB_PUBLIC_INCLUDE_DIR}/filter_policy.h"
+    "${LEVELDB_PUBLIC_INCLUDE_DIR}/table_builder.h"
 )
 
 if(WIN32)
