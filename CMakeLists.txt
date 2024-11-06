@@ -116,6 +116,10 @@ target_sources(leveldb
     "port/port_stdcxx.h"
     "port/port.h"
     "port/thread_annotations.h"
+    "table/block_builder.cc"
+    "table/block_builder.h"
+    "table/iterator.cc"
+    "table/iterator_wrapper.h"
     "util/bloom.cc"
     "util/status.cc"
     "util/env.cc"
@@ -144,6 +148,7 @@ target_sources(leveldb
     "${LEVELDB_PUBLIC_INCLUDE_DIR}/comparator.h"
     "${LEVELDB_PUBLIC_INCLUDE_DIR}/filter_policy.h"
     "${LEVELDB_PUBLIC_INCLUDE_DIR}/table_builder.h"
+    "${LEVELDB_PUBLIC_INCLUDE_DIR}/iterator.h"
 )
 
 if(WIN32)
