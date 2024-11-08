@@ -120,6 +120,8 @@ target_sources(leveldb
     "table/block_builder.h"
     "table/iterator.cc"
     "table/iterator_wrapper.h"
+    "table/two_level_iterator.h"
+    "table/two_level_iterator.cc"
     "util/bloom.cc"
     "util/status.cc"
     "util/env.cc"
