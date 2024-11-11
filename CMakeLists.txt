@@ -137,6 +137,8 @@ target_sources(leveldb
     "util/comparator.cc"
     "util/no_destructor.h"
     "util/filter_policy.cc"
+    "util/crc32c.cc"
+    "util/crc32c.h"
   PUBLIC
     # TODO
     "${LEVELDB_PUBLIC_INCLUDE_DIR}/env.h"
@@ -279,6 +281,7 @@ if(LEVELDB_BUILD_TESTS)
         "util/coding_test.cc"
         "util/hash_test.cc"
         "util/cache_test.cc"
+        "util/crc32c_test.cc"
     )
   endif()
   target_link_libraries(leveldb_tests leveldb gmock gtest gtest_main)
