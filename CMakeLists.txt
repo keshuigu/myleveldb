@@ -139,6 +139,8 @@ target_sources(leveldb
     "util/filter_policy.cc"
     "util/crc32c.cc"
     "util/crc32c.h"
+    "util/histogram.cc"
+    "util/histogram.h"
   PUBLIC
     # TODO
     "${LEVELDB_PUBLIC_INCLUDE_DIR}/env.h"
