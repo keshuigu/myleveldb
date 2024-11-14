@@ -122,6 +122,8 @@ target_sources(leveldb
     "table/iterator_wrapper.h"
     "table/two_level_iterator.h"
     "table/two_level_iterator.cc"
+    "util/arena.cc"
+    "util/arena.h"
     "util/bloom.cc"
     "util/status.cc"
     "util/env.cc"
@@ -284,6 +286,7 @@ if(LEVELDB_BUILD_TESTS)
         "util/hash_test.cc"
         "util/cache_test.cc"
         "util/crc32c_test.cc"
+        "util/arena_test.cc"
     )
   endif()
   target_link_libraries(leveldb_tests leveldb gmock gtest gtest_main)
