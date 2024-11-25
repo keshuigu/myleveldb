@@ -101,6 +101,7 @@ struct LEVELDB_EXPORT Options {
   // 请注意，这些速度显著快于大多数持久存储的速度，因此通常不值得切换到
   // kNoCompression。 即使输入数据不可压缩，kSnappyCompression
   // 实现也会高效地检测到这一点，并切换到未压缩模式。
+  // TODO kSnappyCompression 未实现 可能会出现问题
   CompressionType compression = kSnappyCompression;
 
   // no use
