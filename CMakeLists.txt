@@ -121,6 +121,8 @@ target_sources(leveldb
     "table/block.cc"
     "table/block.h"
     "table/iterator.cc"
+    "table/filter_block.cc"
+    "table/filter_block.h"
     "table/format.cc"
     "table/format.h"
     "table/iterator_wrapper.h"
@@ -291,6 +293,7 @@ if(LEVELDB_BUILD_TESTS)
         "util/cache_test.cc"
         "util/crc32c_test.cc"
         "util/arena_test.cc"
+        "table/filter_block_test.cc"
     )
   endif()
   target_link_libraries(leveldb_tests leveldb gmock gtest gtest_main)

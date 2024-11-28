@@ -36,8 +36,10 @@ class LEVELDB_EXPORT Iterator {
   // 如果源中包含一个大于或等于 target 的条目，则此调用后迭代器有效。
   virtual void Seek(const Slice& target) = 0;
 
+  // 调用后，如果迭代器位于最后一个词条，则Valid为false
   virtual void Next() = 0;
 
+  // 调用后，如果迭代器位于第一个词条，则Valid为false
   virtual void Prev() = 0;
 
   // 返回当前条目的键。返回的 slice 的底层存储仅在迭代器的下一次修改之前有效。

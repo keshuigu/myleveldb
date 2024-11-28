@@ -92,9 +92,11 @@ inline uint64_t DecodeFixed64(const char* ptr) {
 const char* GetVarint32PtrFallback(const char* p, const char* limit,
                                    uint32_t* value);
 
+// 读出的数字存于v，返回读取后指针位置
 inline const char* GetVarint32Ptr(const char* p, const char* limit,
                                   uint32_t* v) {
   // 简单处理小数字
+  // 单字节不用调转顺序
   if (p < limit) {
     uint32_t result = *(reinterpret_cast<const uint8_t*>(p));
     if ((result & 128) == 0) {
