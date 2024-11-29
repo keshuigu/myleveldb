@@ -108,6 +108,7 @@ class Block::Iter : public Iterator {
     assert(Valid());
     const uint32_t original = current_;
     while (GetRestartPoint(restart_index_) >= original) {
+      // 在第一个词条进行 prev 导致无效
       if (restart_index_ == 0) {
         current_ = restarts_;
         restart_index_ = num_restarts_;
