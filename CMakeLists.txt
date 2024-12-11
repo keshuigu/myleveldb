@@ -109,6 +109,7 @@ target_sources(leveldb
     # TODO
     "db/builder.cc"
     "db/dbformat.h"
+    "db/dbformat.cc"
     "db/filename.cc"
     "db/filename.h"
     "db/version_edit.h"
@@ -126,6 +127,7 @@ target_sources(leveldb
     "table/format.cc"
     "table/format.h"
     "table/iterator_wrapper.h"
+    "table/table_builder.cc"
     "table/two_level_iterator.h"
     "table/two_level_iterator.cc"
     "util/arena.cc"
@@ -162,6 +164,7 @@ target_sources(leveldb
     "${LEVELDB_PUBLIC_INCLUDE_DIR}/comparator.h"
     "${LEVELDB_PUBLIC_INCLUDE_DIR}/filter_policy.h"
     "${LEVELDB_PUBLIC_INCLUDE_DIR}/table_builder.h"
+    "${LEVELDB_PUBLIC_INCLUDE_DIR}/table.h"
     "${LEVELDB_PUBLIC_INCLUDE_DIR}/iterator.h"
 )
 
@@ -285,6 +288,7 @@ if(LEVELDB_BUILD_TESTS)
     target_sources(leveldb_tests
       PRIVATE
         "db/filename_test.cc"
+        "db/dbformat_test.cc"
         "util/bloom_test.cc"
         # TODO
         "util/logging_test.cc"
