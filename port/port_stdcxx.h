@@ -69,8 +69,11 @@ public:
   CondVar(const CondVar&) = delete;
   CondVar& operator=(const CondVar&) = delete;
   void Wait(){
+    // 在构造时采用已经锁定的互斥锁
     std::unique_lock<std::mutex> lock(mu_->mu_,std::adopt_lock);
+    // 在等待期间，wait 方法会自动解锁互斥锁，以允许其他线程访问共享资源。当条件变量被通知并且条件满足时，wait 方法会重新锁定互斥锁。
     cv_.wait(lock);
+    // 释放所有权，但并不解锁
     lock.release();
   }
   void Signal() {cv_.notify_one();}

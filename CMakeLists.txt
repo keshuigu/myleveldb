@@ -112,6 +112,7 @@ target_sources(leveldb
     "db/dbformat.cc"
     "db/filename.cc"
     "db/filename.h"
+    "db/skiplist.h"
     "db/version_edit.h"
     "db/version_edit.cc"
     "port/port_stdcxx.h"
@@ -289,6 +290,7 @@ if(LEVELDB_BUILD_TESTS)
       PRIVATE
         "db/filename_test.cc"
         "db/dbformat_test.cc"
+        "db/skiplist_test.cc"
         "util/bloom_test.cc"
         # TODO
         "util/logging_test.cc"
