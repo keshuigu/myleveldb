@@ -59,26 +59,7 @@ class LEVELDB_EXPORT Table {
 
   Rep* const rep_;
 };
-Status Table::InternalGet(const ReadOptions& options, const Slice& k, void* arg,
-                          void (*handle_result)(void*, const Slice&,
-                                                const Slice&)) {
-  Status s;
-  Iterator* index_iter =
-      rep_->index_block->NewIterator(rep_->options.comparator);
-  index_iter->Seek(k);
-  if (index_iter->Valid()) {
-    Slice handle_value = index_iter->value();
-    FilterBlockReader* filter = rep_->filter;
-    BlockHandle handle;
-    // offset是数据块的偏移量
-    if (filter != nullptr && handle.DecodeFrom(&handle_value).ok() &&
-        !filter->KeyMayMatch(handle.offset(), k)) {
 
-    }else {
-      Iterator* block_iter = BlockReader(this,options,index_iter->value());
-    }
-  }
-}
 }  // namespace leveldb
 
 #endif

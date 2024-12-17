@@ -253,4 +253,5 @@ uint64_t Table::ApproximateOffsetOf(const Slice& key) const {
   delete index_iter;
   return result;
 }
+
 }  // namespace leveldb
