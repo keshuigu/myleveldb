@@ -119,6 +119,8 @@ target_sources(leveldb
     "db/table_cache.h"
     "db/version_edit.h"
     "db/version_edit.cc"
+    "db/version_set.h"
+    "db/version_set.cc"
     "port/port_stdcxx.h"
     "port/port.h"
     "port/thread_annotations.h"
@@ -295,6 +297,8 @@ if(LEVELDB_BUILD_TESTS)
         "db/filename_test.cc"
         "db/dbformat_test.cc"
         "db/skiplist_test.cc"
+        "db/version_edit_test.cc"
+        "db/version_set_test.cc"
         "util/bloom_test.cc"
         # TODO
         "util/logging_test.cc"

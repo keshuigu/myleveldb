@@ -53,7 +53,6 @@ class MemTable {
 
  private:
   friend class MemTableIterator;
-  friend class MemTableBackwardIterator;
   struct KeyComparator {
     const InternalKeyComparator comparator;
     explicit KeyComparator(const InternalKeyComparator& c) : comparator(c) {}
