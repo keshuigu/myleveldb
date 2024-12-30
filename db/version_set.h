@@ -6,7 +6,7 @@
 #include <vector>
 
 #include "db/dbformat.h"
-// #include "db/version_edit.h"
+#include "db/version_edit.h"
 #include "port/port.h"
 #include "port/thread_annotations.h"
 
