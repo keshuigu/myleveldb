@@ -112,6 +112,10 @@ target_sources(leveldb
     "db/dbformat.cc"
     "db/filename.cc"
     "db/filename.h"
+    "db/log_reader.cc"
+    "db/log_reader.h"
+    "db/log_writer.cc"
+    "db/log_writer.h"
     "db/skiplist.h"
     "db/memtable.cc"
     "db/memtable.h"
@@ -299,6 +303,7 @@ if(LEVELDB_BUILD_TESTS)
         "db/skiplist_test.cc"
         "db/version_edit_test.cc"
         "db/version_set_test.cc"
+        "db/log_test.cc"
         "util/bloom_test.cc"
         # TODO
         "util/logging_test.cc"
