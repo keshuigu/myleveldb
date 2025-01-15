@@ -70,6 +70,7 @@ class Version {
   void Ref();
   void Unref();
 
+  // 将所有在 "level" 中与 [begin, end] 重叠的文件存储在 "*inputs" 中
   void GetOverlappingInputs(int level, const InternalKey* begin,
                             const InternalKey* end,
                             std::vector<FileMetaData*>* inputs);
@@ -268,8 +269,8 @@ class VersionSet {
 
   WritableFile* descriptor_file_;
   log::Writer* descriptor_log_;
-  Version dummy_version_;  // 版本的循环双向链表的头部。
-  Version* current_;       // == dummy_versions_.prev_
+  Version dummy_versions_;  // 版本的循环双向链表的头部。
+  Version* current_;        // == dummy_versions_.prev_
 
   // 每个层级的下一个压缩应从该层级的哪个键开始。
   // 可以是一个空字符串，或者是一个有效的 InternalKey。
@@ -333,8 +334,8 @@ class Compaction {
 
   // 实现 IsBaseLevelForKey 的状态
   // level_ptrs_ 保存了 input_version_->levels_ 的索引：我们的状态是
-  // 我们定位在每个比当前压缩涉及的层级更高的文件范围内（即对于所有 L >= level_
-  // + 2）。
+  // 我们定位在每个比当前压缩涉及的层级更高的文件范围内
+  // （即对于所有 L >=level_+2）。
   size_t level_ptrs_[config::kNumLevels];
 };
 }  // namespace leveldb

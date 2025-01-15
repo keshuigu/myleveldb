@@ -69,7 +69,7 @@ class VersionEdit {
   }
 
   void RemoveFile(int level, uint64_t file) {
-    delete_files_.insert(std::make_pair(level, file));
+    deleted_files_.insert(std::make_pair(level, file));
   }
 
   void EncodeTo(std::string* dst) const;
@@ -95,7 +95,7 @@ class VersionEdit {
   bool has_last_sequence_;
 
   std::vector<std::pair<int, InternalKey>> compact_pointers_;
-  DeletedFileSet delete_files_;
+  DeletedFileSet deleted_files_;
   std::vector<std::pair<int, FileMetaData>> new_files_;
 };
 

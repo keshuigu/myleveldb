@@ -282,7 +282,7 @@ Cache::Handle* LRUCache::Insert(const Slice& key, uint32_t hash, void* value,
     e->next = nullptr;
   }
   while (usage_ > capacity_ && lru_.next != &lru_) {
-    LRUHandle* old = lru_.next;
+    LRUHandle* old = lru_.next; // 插入位置在lru_前
     assert(old->refs == 1);
     bool erased = FinishErase(table_.Remove(old->key(), old->hash));
     if (!erased) {
