@@ -728,7 +728,7 @@ void VersionSet::AppendVersion(Version* v) {
   // Make "v" current
   assert(v->refs_ == 0);
   assert(v != current_);
-  if (current != nullptr) {
+  if (current_ != nullptr) {
     current_->Unref();
   }
   current_ = v;
