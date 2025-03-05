@@ -138,9 +138,12 @@ target_sources(leveldb
     "table/format.cc"
     "table/format.h"
     "table/iterator_wrapper.h"
+    "table/merger.cc"
+    "table/merger.h"
     "table/table_builder.cc"
     "table/two_level_iterator.h"
     "table/two_level_iterator.cc"
+    "table/table.cc"
     "util/arena.cc"
     "util/arena.h"
     "util/bloom.cc"
@@ -162,6 +165,7 @@ target_sources(leveldb
     "util/crc32c.h"
     "util/histogram.cc"
     "util/histogram.h"
+    "util/options.cc"
   PUBLIC
     # TODO
     "${LEVELDB_PUBLIC_INCLUDE_DIR}/env.h"

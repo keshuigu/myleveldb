@@ -66,6 +66,7 @@ Status Table::Open(const Options& options, RandomAccessFile* file,
     *table = new Table(rep);
     (*table)->ReadMeta(footer);
   }
+  return s;
 }
 
 void Table::ReadMeta(const Footer& footer) {
