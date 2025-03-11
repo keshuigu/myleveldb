@@ -311,6 +311,7 @@ if(LEVELDB_BUILD_TESTS)
         "db/version_edit_test.cc"
         "db/version_set_test.cc"
         "db/log_test.cc"
+        "db/write_batch_test.cc"
         "util/bloom_test.cc"
         # TODO
         "util/logging_test.cc"

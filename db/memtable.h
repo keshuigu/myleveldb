@@ -14,6 +14,7 @@ class InternalKeyComparator;
 class Iterator;
 
 class MemTable {
+ public:
   // MemTables are reference counted.  The initial reference count
   // is zero and the caller must call Ref() at least once.
   explicit MemTable(const InternalKeyComparator& comparator);

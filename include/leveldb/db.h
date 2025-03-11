@@ -7,6 +7,7 @@
 #include "leveldb/export.h"
 #include "leveldb/iterator.h"
 #include "leveldb/options.h"
+#include "leveldb/slice.h"
 
 namespace leveldb {
 // 版本号与CMakeLists.txt保持一致
