@@ -108,8 +108,13 @@ target_sources(leveldb
     "${PROJECT_BINARY_DIR}/${LEVELDB_PORT_CONFIG_DIR}/port_config.h"
     # TODO
     "db/builder.cc"
+    "db/db_impl.cc"
+    "db/db_impl.h"
+    "db/db_iter.cc"
+    "db/db_iter.h"
     "db/dbformat.h"
     "db/dbformat.cc"
+    "db/dumpfile.cc"
     "db/filename.cc"
     "db/filename.h"
     "db/log_reader.cc"
