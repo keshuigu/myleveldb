@@ -24,6 +24,46 @@ class VersionSet;
 class DBImpl : public DB {
  public:
   DBImpl(const Options& options, const std::string& dbname);
+  DBImpl(const DBImpl&) = delete;
+  DBImpl& operator=(const DBImpl&) = delete;
+
+  ~DBImpl() override;
+
+  // 实现接口
+  Status Put(const WriteOptions&, const Slice& key,
+             const Slice& value) override;
+  Status Delete(const WriteOptions&, const Slice& key) override;
+  Status Write(const WriteOptions& options, WriteBatch* updates) override;
+  Status Get(const ReadOptions& options, const Slice& key,
+             std::string* value) override;
+  Iterator* NewIterator(const ReadOptions&) override;
+  const Snapshot* GetSnapshot() override;
+  void ReleaseSnapshot(const Snapshot* snapshot) override;
+  bool GetProperty(const Slice& property, std::string* value) override;
+  void GetApproximateSizes(const Range* range, int n, uint64_t* sizes) override;
+  void CompactRange(const Slice* begin, const Slice* end) override;
+
+  // 其他方法
+
+  // 测试方法
+
+  // 压缩命名层级中与 [*begin,*end] 重叠的任何文件
+  void TEST_CompactRange(int level, const Slice* begin, const Slice* end);
+
+  // 强制将当前 memtable 内容压缩。
+  Status TEST_CompactMemTable();
+
+  // 返回数据库当前状态的内部迭代器。
+  // 该迭代器的键是内部键（参见 format.h）。
+  // 当不再需要时，应删除返回的迭代器。
+  Iterator* TEST_NewInternalIterator();
+
+  // 返回下一级别的最大重叠数据（以字节为单位），适用于级别 >= 1 的任何文件。
+  int64_t TEST_MaxNextLevelOverlappingBytes();
+
+  // 记录在指定内部键处读取的字节样本。
+  // 样本大约每读取 config::kReadBytesPeriod 字节采集一次。
+  void RecordReadSample(Slice key);
 
  private:
   friend class DB;

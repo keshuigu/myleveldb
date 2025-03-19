@@ -63,7 +63,7 @@ class LEVELDB_EXPORT DB {
   // 将指定的更新应用到数据库。
   // 成功时返回 OK，失败时返回非 OK 状态。
   // 注意：考虑将 options.sync 设置为 true。
-  virtual Status Write(const ReadOptions& options, WriteBatch* updates) = 0;
+  virtual Status Write(const WriteOptions& options, WriteBatch* updates) = 0;
 
   // 如果数据库包含 "key" 的条目，则将相应的值存储在 *value 中并返回 OK。
   // 如果没有 "key" 的条目，则保持 *value 不变并返回一个 Status::IsNotFound()
