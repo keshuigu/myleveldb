@@ -120,7 +120,7 @@ inline bool DBIter::ParseKey(ParsedInternalKey* ikey) {
 
 void DBIter::Next() {
   assert(valid_);
-  if (direction_ = kReverse) {
+  if (direction_ == kReverse) {
     // iter_ 指向 this->key() 条目之前，
     // 因此进入 this->key() 条目的范围，然后使用下面的正常跳过代码。
     direction_ = kForward;

@@ -124,7 +124,7 @@ class DBImpl : public DB {
   Status MakeRoomForWrite(bool force /* 即使有空间也要压缩？*/)
       EXCLUSIVE_LOCKS_REQUIRED(mutex_);
 
-  WriteBatch* BUildBatchGroup(Writer** last_writer)
+  WriteBatch* BuildBatchGroup(Writer** last_writer)
       EXCLUSIVE_LOCKS_REQUIRED(mutex_);
 
   void RecordBackgroundError(const Status& s);
@@ -138,8 +138,8 @@ class DBImpl : public DB {
   Status DoCompactionWork(CompactionState* compact)
       EXCLUSIVE_LOCKS_REQUIRED(mutex_);
 
-  Status OpenCompactionOutputFIle(CompactionState* compact);
-  Status FinishCompactionOutputFIle(CompactionState* compact, Iterator* input);
+  Status OpenCompactionOutputFile(CompactionState* compact);
+  Status FinishCompactionOutputFile(CompactionState* compact, Iterator* input);
   Status InstallCompactionResults(CompactionState* compact)
       EXCLUSIVE_LOCKS_REQUIRED(mutex_);
 
