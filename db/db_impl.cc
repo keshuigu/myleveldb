@@ -552,7 +552,6 @@ void DBImpl::CompactMemTable() {
   }
 }
 
-
 void DBImpl::CompactRange(const Slice* begin, const Slice* end) {
   int max_level_with_files = 1;
   {
@@ -755,7 +754,7 @@ void DBImpl::BackgroundCompaction() {
       m->tmp_storage = manual_end;
       m->begin = &m->tmp_storage;
     }
-    manual_compaction_ = nullptr; // ？？？
+    manual_compaction_ = nullptr;  // ？？？
   }
 }
 
@@ -850,8 +849,6 @@ Status DBImpl::FinishCompactionOutputFile(CompactionState* compact,
   return s;
 }
 
-// HERE
-
 Status DBImpl::InstallCompactionResults(CompactionState* compact) {
   mutex_.AssertHeld();
   Log(options_.info_log, "Compacted %d@%d + %d@%d files => %lld bytes",
@@ -945,13 +942,10 @@ Status DBImpl::DoCompactionWork(CompactionState* compact) {
       } else if (ikey.type == kTypeDeletion &&
                  ikey.sequence <= compact->smallest_snapshot &&
                  compact->compaction->IsBaseLevelForKey(ikey.user_key)) {
-        // For this user key:
-        // (1) there is no data in higher levels
-        // (2) data in lower levels will have larger sequence numbers
-        // (3) data in layers that are being compacted here and have
-        //     smaller sequence numbers will be dropped in the next
-        //     few iterations of this loop (by rule (A) above).
-        // Therefore this deletion marker is obsolete and can be dropped.
+        // 对于这个用户键：
+        // (1) 在更高层级没有数据
+        // (2) 更低层级的数据将具有更大的序列号
+        // (3) 在这里被压缩的层中的数据具有较小的序列号，将在此循环的接下来的几次迭代中被删除（根据上面的规则(A)）。 因此，这个删除标记已经过时，可以删除。
         drop = true;
       }
 
@@ -1031,6 +1025,8 @@ Status DBImpl::DoCompactionWork(CompactionState* compact) {
   return status;
 }
 
+
+// Here
 namespace {
 
 struct IterState {
